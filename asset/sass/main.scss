@@ -1,0 +1,17 @@
+// File: asset/sass/main.scss
+
+// 1. Abstracts (Biến, Mixin)
+@import './abstracts/variables';
+@import './abstracts/mixins';
+
+// 2. Base (Reset CSS, Typography)
+@import './base/reset';
+@import './base/typography';
+
+// 3. Components (Button, Card, Input)
+@import './components/buttons';
+@import './components/cards';
+
+// 4. Layout (Header, Footer, Navigation)
+@import './layout/header';
+@import './layout/footer';
