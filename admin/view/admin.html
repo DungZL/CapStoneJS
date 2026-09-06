@@ -1,137 +1,130 @@
 <!DOCTYPE html>
- <html lang="en">
- <head>
-   <meta charset="UTF-8">
-   <title>Admin - Quản lý sản phẩm</title>
-   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-   <!-- Nhớ gắn link FontAwesome để hiện các icon (Thêm/Sửa/Xóa) -->
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-   <link rel="stylesheet" href="../../asset/css/main.css">
- </head>
- <body>
-   <!-- Thanh Điều Hướng (Navbar) -->
-   <nav class="navbar navbar-dark bg-secondary">
-     <div class="container">
-       <a class="navbar-brand" href="#">Trang Quản Trị</a>
-       <a href="../../index.html" class="btn btn-outline-light">Về Trang Mua Hàng</a>
-     </div>
-   </nav>
- 
-   <div class="container mt-4">
-     <h2 class="mb-4">Quản lý sản phẩm</h2>
-     
-     <!-- Thanh Tìm kiếm, Lọc và nút Thêm Mới -->
-     <div class="row mb-3 align-items-center">
-       <div class="col-4">
-         <input type="text" id="txtSearch" class="form-control" placeholder="Tìm kiếm theo tên..." oninput="searchProduct()">
-       </div>
-       <div class="col-4">
-         <select id="selSort" class="form-select" onchange="sortProduct()">
-           <option value="">Sắp xếp theo giá</option>
-           <option value="asc">Tăng dần (Thấp đến Cao)</option>
-           <option value="desc">Giảm dần (Cao đến Thấp)</option>
-         </select>
-       </div>
-       <div class="col-4 text-end">
-          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#adminModal" onclick="resetForm()">
-            <i class="fa fa-plus"></i> Thêm Sản Phẩm
-          </button>
-       </div>
-     </div>
-     
-     <!-- Bảng Hiển Thị Danh Sách Sản Phẩm -->
-     <div class="table-responsive">
-       <table class="table table-bordered table-striped align-middle">
-         <thead class="table-dark">
-           <tr>
-             <th>STT</th>
-             <th>Tên sản phẩm</th>
-             <th>Giá ($)</th>
-             <th>Hình ảnh</th>
-             <th>Mô tả</th>
-             <th>Loại</th>
-             <th>Thao tác</th>
-           </tr>
-         </thead>
-         <tbody id="tblAdminProducts">
-           <!-- Dữ liệu JS sẽ được render vào đây -->
-         </tbody>
-       </table>
-     </div>
-   </div>
- 
-   <!-- Modal Thêm/Sửa Sản Phẩm -->
-   <div class="modal fade" id="adminModal" tabindex="-1">
-     <div class="modal-dialog modal-lg">
-       <div class="modal-content">
-         <div class="modal-header">
-           <h5 class="modal-title" id="modalTitle">Thêm Sản Phẩm Mới</h5>
-           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-         </div>
-         <div class="modal-body">
-           <form id="productForm">
-             <input type="hidden" id="productId">
-             <div class="row g-3">
-               <div class="col-md-6">
-                 <label class="form-label">Tên sản phẩm</label>
-                 <input type="text" id="name" class="form-control" placeholder="VD: iPhone 15 Pro">
-                 <span id="errorName" class="text-danger small"></span>
-               </div>
-               <div class="col-md-6">
-                 <label class="form-label">Giá bán ($)</label>
-                 <input type="number" id="price" class="form-control" placeholder="VD: 999">
-                 <span id="errorPrice" class="text-danger small"></span>
-               </div>
-               <div class="col-md-6">
-                 <label class="form-label">Màn hình</label>
-                 <input type="text" id="screen" class="form-control" placeholder="VD: screen 68">
-                 <span id="errorScreen" class="text-danger small"></span>
-               </div>
-               <div class="col-md-6">
-                 <label class="form-label">Camera Sau</label>
-                 <input type="text" id="backCamera" class="form-control" placeholder="VD: 2 camera 12 MP">
-                 <span id="errorBackCam" class="text-danger small"></span>
-               </div>
-               <div class="col-md-6">
-                 <label class="form-label">Camera Trước</label>
-                 <input type="text" id="frontCamera" class="form-control" placeholder="VD: 7 MP">
-                 <span id="errorFrontCam" class="text-danger small"></span>
-               </div>
-               <div class="col-md-6">
-                 <label class="form-label">Loại (Type)</label>
-                 <select id="type" class="form-select">
-                   <option value="">-- Chọn thương hiệu --</option>
-                   <option value="samsung">Samsung</option>
-                   <option value="iphone">iPhone</option>
-                 </select>
-                 <span id="errorType" class="text-danger small"></span>
-               </div>
-               <div class="col-12">
-                 <label class="form-label">Link Hình Ảnh (URL)</label>
-                 <input type="text" id="img" class="form-control" placeholder="VD: https://...">
-                 <span id="errorImg" class="text-danger small"></span>
-               </div>
-               <div class="col-12">
-                 <label class="form-label">Mô tả</label>
-                 <textarea id="desc" class="form-control" rows="3" placeholder="Nhập mô tả sản phẩm"></textarea>
-                 <span id="errorDesc" class="text-danger small"></span>
-               </div>
-             </div>
-           </form>
-         </div>
-         <div class="modal-footer">
-           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-           <button type="button" class="btn btn-primary" id="btnSave" onclick="saveProduct()">Lưu</button>
-         </div>
-       </div>
-     </div>
-   </div>
- 
-   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-   <!-- Bổ sung file JS của Bootstrap để Modal có thể hoạt động -->
-   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-   <script src="../model/Product.js"></script>
-   <script src="../services/api.js"></script>
-   <script src="../controller/main.js"></script>
- </body>
- </html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Quản lý sản phẩm</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="../../asset/css/main.css">
+</head>
+<body>
+  <!-- Thanh Điều Hướng (Navbar) -->
+  <nav class="navbar navbar-dark bg-secondary">
+    <div class="container">
+      <a class="navbar-brand" href="#">Trang Quản Trị</a>
+      <a href="../../index.html" class="btn btn-outline-light">Về Trang Mua Hàng</a>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <h2 class="mb-4">Quản lý sản phẩm</h2>
+    
+    <!-- Thanh Tìm kiếm, Lọc và nút Thêm Mới -->
+    <div class="row mb-3 align-items-center">
+      <div class="col-4 position-relative">
+        <input type="text" id="txtSearch" class="form-control" placeholder="Tìm kiếm theo tên..." oninput="searchProduct()" autocomplete="off">
+        <!-- Thẻ popup hiển thị gợi ý -->
+        <div id="searchSuggestions" class="dropdown-menu w-100 shadow-sm" style="display: none; max-height: 220px; overflow-y: auto; position: absolute; top: 100%; left: 0; z-index: 1050;"></div>
+      </div>
+      <div class="col-4">
+        <select id="selSort" class="form-select" onchange="sortProduct()">
+          <option value="">Sắp xếp theo giá</option>
+          <option value="asc">Tăng dần (Thấp đến Cao)</option>
+          <option value="desc">Giảm dần (Cao đến Thấp)</option>
+        </select>
+      </div>
+      <div class="col-4 text-end">
+         <!-- Nút Thêm Sản Phẩm Mới gọi chuẩn ID của Modal -->
+         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#productModal" onclick="resetForm()">
+           <i class="fa fa-plus"></i> Thêm Sản Phẩm
+         </button>
+      </div>
+    </div>
+    
+    <!-- Bảng Hiển Thị Danh Sách Sản Phẩm -->
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>STT</th>
+            <th>Tên sản phẩm</th>
+            <th>Giá ($)</th>
+            <th>Hình ảnh</th>
+            <th>Mô tả</th>
+            <th>Loại</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="tblAdminProducts">
+          <!-- Dữ liệu JS sẽ được render vào đây -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Modal Thêm/Sửa Sản Phẩm (Gắn ID productModal để khớp với JS) -->
+  <div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTitle">Thêm Sản Phẩm Mới</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="productForm">
+            <input type="hidden" id="productId">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">Tên sản phẩm</label>
+                <input type="text" id="name" class="form-control" placeholder="VD: iPhone 15 Pro">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Giá bán ($)</label>
+                <input type="number" id="price" class="form-control" placeholder="VD: 999">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Màn hình</label>
+                <input type="text" id="screen" class="form-control" placeholder="VD: 6.7 inch">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Camera Sau</label>
+                <input type="text" id="backCamera" class="form-control" placeholder="VD: 48 MP">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Camera Trước</label>
+                <input type="text" id="frontCamera" class="form-control" placeholder="VD: 12 MP">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Loại (Type)</label>
+                <select id="type" class="form-select">
+                  <option value="">-- Chọn thương hiệu --</option>
+                  <option value="samsung">Samsung</option>
+                  <option value="iphone">iPhone</option>
+                </select>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Link Hình Ảnh (URL)</label>
+                <input type="text" id="img" class="form-control" placeholder="VD: https://...">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Mô tả</label>
+                <textarea id="desc" class="form-control" rows="3" placeholder="Nhập mô tả sản phẩm"></textarea>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" id="btnSave" onclick="saveProduct()">Lưu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../model/Product.js"></script>
+  <script src="../services/api.js"></script>
+  <script src="../controller/main.js"></script>
+</body>
+</html>

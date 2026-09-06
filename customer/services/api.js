@@ -1,5 +1,5 @@
 // File: customer/services/api.js
-const URL_API = "https://6a9c24130ad174e139e903c8.mockapi.io/Products"; // Thay bằng link MockAPI của bạn
+const URL_API = "https://svcy.myclass.vn/api/ProductApi/getall"; // Thay bằng link MockAPI của bạn
 
 class CustomerService {
   getProductsApi() {
