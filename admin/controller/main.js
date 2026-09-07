@@ -24,7 +24,7 @@ function renderTable(list) {
         <td class="text-danger fw-bold">$${item.price}</td>
         <td><img src="${item.img}" width="60" style="object-fit: contain;" alt="Lỗi ảnh"></td>
         <td><small>${moTa}</small></td>
-        <td><span class="badge bg-info text-dark">${item.type || "Khác"}</span></td>
+        <td><span class="badge bg-info text-dark text-capitalize">${item.type || "Khác"}</span></td>
         <td>
           <button class="btn btn-warning btn-sm me-1" onclick="editProduct('${item.id}')" data-bs-toggle="modal" data-bs-target="#productModal">
             <i class="fa fa-edit"></i>
@@ -49,10 +49,13 @@ function resetForm() {
 // 4. Đọc dữ liệu từ form
 function getFormData() {
   const id = document.getElementById("productId").value;
-  const name = document.getElementById("name").value;
+  const name = document.getElementById("name").value.trim();
   const price = document.getElementById("price").value;
-  const img = document.getElementById("img").value;
-  const description = document.getElementById("desc").value;
+  const screen = document.getElementById("screen") ? document.getElementById("screen").value.trim() : "";
+  const backCamera = document.getElementById("backCamera") ? document.getElementById("backCamera").value.trim() : "";
+  const frontCamera = document.getElementById("frontCamera") ? document.getElementById("frontCamera").value.trim() : "";
+  const img = document.getElementById("img").value.trim();
+  const description = document.getElementById("desc").value.trim();
   const type = document.getElementById("type").value;
 
   if (!name || !price || !img) {
@@ -60,11 +63,20 @@ function getFormData() {
     return null;
   }
 
+  if (!type) {
+    alert("Vui lòng chọn Loại sản phẩm!");
+    return null;
+  }
+
   return {
     id: id ? id : String(Date.now()),
     name: name,
     price: price,
+    screen: screen,
+    backCamera: backCamera,
+    frontCamera: frontCamera,
     img: img,
+    desc: description,
     description: description,
     type: type,
     deleted: false
@@ -102,8 +114,26 @@ function editProduct(id) {
     document.getElementById("name").value = p.name || "";
     document.getElementById("price").value = p.price || "";
     document.getElementById("img").value = p.img || "";
-    document.getElementById("type").value = p.type || "";
     document.getElementById("desc").value = p.description || p.desc || "";
+    
+    // Gán loại sản phẩm (hỗ trợ so sánh không phân biệt chữ hoa/thường)
+    const selectType = document.getElementById("type");
+    if (p.type) {
+      const typeLower = String(p.type).toLowerCase();
+      let matched = false;
+      for (let opt of selectType.options) {
+        if (opt.value.toLowerCase() === typeLower) {
+          selectType.value = opt.value;
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) {
+        selectType.value = p.type;
+      }
+    } else {
+      selectType.value = "";
+    }
     
     if(document.getElementById("screen")) document.getElementById("screen").value = p.screen || "";
     if(document.getElementById("backCamera")) document.getElementById("backCamera").value = p.backCamera || "";

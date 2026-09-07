@@ -45,7 +45,7 @@ function filterProduct() {
   if (type === "all") {
     renderProducts(productList);
   } else {
-    const filteredList = productList.filter((p) => p.type.toLowerCase() === type);
+    const filteredList = productList.filter((p) => (p.type || "").toLowerCase() === type);
     renderProducts(filteredList);
   }
 }
