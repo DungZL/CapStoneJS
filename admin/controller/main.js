@@ -1,35 +1,58 @@
+// File: admin/controller/main.js
 const adminService = new AdminService();
 let listData = [];
+let adminModalBS = null;
+
+// Khởi tạo Bootstrap Modal Instance an toàn
+function getModalInstance() {
+  if (!adminModalBS) {
+    const modalEl = document.getElementById("productModal");
+    if (modalEl && window.bootstrap) {
+      adminModalBS = bootstrap.Modal.getOrCreateInstance(modalEl);
+    }
+  }
+  return adminModalBS;
+}
 
 // 1. Khởi tạo danh sách khi mở trang
-window.onload = () => { fetchList(); };
+window.onload = () => {
+  getModalInstance();
+  fetchList();
+};
 
 function fetchList() {
   adminService.getList().then(res => {
     listData = res.data;
     renderTable(listData);
-  }).catch(err => console.error("Lỗi gọi danh sách:", err));
+  }).catch(err => {
+    console.error("Lỗi gọi danh sách:", err);
+  });
 }
 
-// 2. Render giao diện bảng
+// 2. Render giao diện bảng danh sách sản phẩm
 function renderTable(list) {
   let content = "";
   list.forEach((item, index) => {
-    let moTa = item.description || item.desc || "Chưa có mô tả";
+    let moTa = item.desc || item.description || "Chưa có mô tả";
+    let hinhAnh = item.img || "https://via.placeholder.com/60?text=No+Image";
     
     content += `
       <tr>
-        <td>${index + 1}</td>
-        <td class="fw-bold">${item.name}</td>
-        <td class="text-danger fw-bold">$${item.price}</td>
-        <td><img src="${item.img}" width="60" style="object-fit: contain;" alt="Lỗi ảnh"></td>
-        <td><small>${moTa}</small></td>
-        <td><span class="badge bg-info text-dark text-capitalize">${item.type || "Khác"}</span></td>
+        <td class="text-center">${index + 1}</td>
+        <td class="fw-bold text-dark">${item.name}</td>
+        <td class="text-danger fw-bold">$${Number(item.price).toLocaleString()}</td>
+        <td class="text-center">
+          <img src="${hinhAnh}" width="60" height="60" style="object-fit: contain;" alt="${item.name}" onerror="this.src='https://via.placeholder.com/60?text=Error'">
+        </td>
+        <td><small class="text-muted text-break">${moTa}</small></td>
         <td>
-          <button class="btn btn-warning btn-sm me-1" onclick="editProduct('${item.id}')" data-bs-toggle="modal" data-bs-target="#productModal">
+          <span class="badge bg-primary text-uppercase px-2 py-1">${item.type || "Khác"}</span>
+        </td>
+        <td class="text-center">
+          <button class="btn btn-warning btn-sm me-1" onclick="editProduct('${item.id}')" title="Chỉnh sửa">
             <i class="fa fa-edit"></i>
           </button>
-          <button class="btn btn-danger btn-sm" onclick="deleteProduct('${item.id}')">
+          <button class="btn btn-danger btn-sm" onclick="deleteProduct('${item.id}')" title="Xóa">
             <i class="fa fa-trash"></i>
           </button>
         </td>
@@ -39,84 +62,111 @@ function renderTable(list) {
   document.getElementById("tblAdminProducts").innerHTML = content;
 }
 
-// 3. Reset form khi bấm Thêm Mới
+// Helper: Hiển thị lỗi validation
+function setFieldError(inputId, errorSpanId, message) {
+  const inputEl = document.getElementById(inputId);
+  const errorEl = document.getElementById(errorSpanId);
+  if (inputEl) inputEl.classList.add("is-invalid");
+  if (errorEl) errorEl.innerText = message;
+}
+
+// Helper: Xóa lỗi validation
+function clearFieldError(inputId, errorSpanId) {
+  const inputEl = document.getElementById(inputId);
+  const errorEl = document.getElementById(errorSpanId);
+  if (inputEl) inputEl.classList.remove("is-invalid");
+  if (errorEl) errorEl.innerText = "";
+}
+
+// 3. Hàm Validation Form (Kiểm tra dữ liệu nhập vào)
+function validateForm() {
+  let isValid = true;
+
+  const name = document.getElementById("name").value.trim();
+  const price = document.getElementById("price").value.trim();
+  const type = document.getElementById("type").value.trim();
+  const img = document.getElementById("img").value.trim();
+
+  // 1. Kiểm tra Tên sản phẩm: Không được để trống
+  if (!name) {
+    setFieldError("name", "errorName", "Vui lòng nhập tên sản phẩm!");
+    isValid = false;
+  } else {
+    clearFieldError("name", "errorName");
+  }
+
+  // 2. Kiểm tra Giá bán: Không được để trống, phải là số và lớn hơn 0
+  if (!price) {
+    setFieldError("price", "errorPrice", "Vui lòng nhập giá bán!");
+    isValid = false;
+  } else if (isNaN(price) || Number(price) <= 0) {
+    setFieldError("price", "errorPrice", "Giá bán phải là số dương lớn hơn 0!");
+    isValid = false;
+  } else {
+    clearFieldError("price", "errorPrice");
+  }
+
+  // 3. Kiểm tra Loại (Type): Bắt buộc chọn giá trị hợp lệ
+  const validTypes = ["samsung", "iphone", "tablet", "laptop"];
+  if (!type) {
+    setFieldError("type", "errorType", "Vui lòng chọn loại sản phẩm!");
+    isValid = false;
+  } else if (!validTypes.includes(type.toLowerCase())) {
+    setFieldError("type", "errorType", "Loại sản phẩm không hợp lệ!");
+    isValid = false;
+  } else {
+    clearFieldError("type", "errorType");
+  }
+
+  // 4. Kiểm tra Link hình ảnh (URL): Nếu có nhập thì phải đúng URL (bắt đầu bằng http:// hoặc https://)
+  const urlRegex = /^(https?:\/\/)/i;
+  if (img && !urlRegex.test(img)) {
+    setFieldError("img", "errorImg", "Link hình ảnh phải là URL hợp lệ (bắt đầu bằng http:// hoặc https://)!");
+    isValid = false;
+  } else {
+    clearFieldError("img", "errorImg");
+  }
+
+  // Các trường được phép để trống: screen, backCamera, frontCamera, desc
+  clearFieldError("screen", "errorScreen");
+  clearFieldError("backCamera", "errorBackCamera");
+  clearFieldError("frontCamera", "errorFrontCamera");
+  clearFieldError("desc", "errorDesc");
+
+  return isValid;
+}
+
+// 4. Reset form khi bấm "Thêm Sản Phẩm"
 function resetForm() {
   document.getElementById("productForm").reset();
   document.getElementById("productId").value = "";
   document.getElementById("modalTitle").innerText = "Thêm Sản Phẩm Mới";
+
+  // Xóa toàn bộ trạng thái lỗi
+  const fields = ["name", "price", "screen", "backCamera", "frontCamera", "type", "img", "desc"];
+  fields.forEach(field => {
+    const capitalized = field.charAt(0).toUpperCase() + field.slice(1);
+    clearFieldError(field, `error${capitalized}`);
+  });
 }
 
-// 4. Đọc dữ liệu từ form
-function getFormData() {
-  const id = document.getElementById("productId").value;
-  const name = document.getElementById("name").value.trim();
-  const price = document.getElementById("price").value;
-  const screen = document.getElementById("screen") ? document.getElementById("screen").value.trim() : "";
-  const backCamera = document.getElementById("backCamera") ? document.getElementById("backCamera").value.trim() : "";
-  const frontCamera = document.getElementById("frontCamera") ? document.getElementById("frontCamera").value.trim() : "";
-  const img = document.getElementById("img").value.trim();
-  const description = document.getElementById("desc").value.trim();
-  const type = document.getElementById("type").value;
-
-  if (!name || !price || !img) {
-    alert("Vui lòng nhập Tên, Giá và Link Hình Ảnh!");
-    return null;
-  }
-
-  if (!type) {
-    alert("Vui lòng chọn Loại sản phẩm!");
-    return null;
-  }
-
-  return {
-    id: id ? id : String(Date.now()),
-    name: name,
-    price: price,
-    screen: screen,
-    backCamera: backCamera,
-    frontCamera: frontCamera,
-    img: img,
-    desc: description,
-    description: description,
-    type: type,
-    deleted: false
-  };
-}
-
-// 5. Hàm Thêm mới hoặc Cập nhật sản phẩm
-function saveProduct() {
-  const product = getFormData();
-  if (!product) return;
-
-  const id = document.getElementById("productId").value;
-
-  if (id) {
-    adminService.update(id, product).then(() => {
-      alert("Cập nhật thành công!");
-      closeModal();
-      fetchList();
-    }).catch(err => console.error("Lỗi cập nhật:", err));
-  } else {
-    adminService.add(product).then(() => {
-      alert("Thêm sản phẩm thành công!");
-      closeModal();
-      fetchList();
-    }).catch(err => console.error("Lỗi thêm mới:", err));
-  }
-}
-
-// 6. Đưa dữ liệu lên form để Sửa
+// 5. Đưa dữ liệu lên form để Sửa sản phẩm
 function editProduct(id) {
-  document.getElementById("modalTitle").innerText = "Chỉnh Sửa Sản Phẩm";
-  adminService.getById(id).then(res => {
+  resetForm();
+  document.getElementById("modalTitle").innerText = "Cập nhật sản phẩm";
+
+  adminService.getDetail(id).then(res => {
     const p = res.data;
     document.getElementById("productId").value = p.id;
     document.getElementById("name").value = p.name || "";
     document.getElementById("price").value = p.price || "";
     document.getElementById("img").value = p.img || "";
-    document.getElementById("desc").value = p.description || p.desc || "";
-    
-    // Gán loại sản phẩm (hỗ trợ so sánh không phân biệt chữ hoa/thường)
+    document.getElementById("desc").value = p.desc || p.description || "";
+    document.getElementById("screen").value = p.screen || "";
+    document.getElementById("backCamera").value = p.backCamera || "";
+    document.getElementById("frontCamera").value = p.frontCamera || "";
+
+    // Chọn đúng loại sản phẩm
     const selectType = document.getElementById("type");
     if (p.type) {
       const typeLower = String(p.type).toLowerCase();
@@ -128,26 +178,72 @@ function editProduct(id) {
           break;
         }
       }
-      if (!matched) {
-        selectType.value = p.type;
-      }
+      if (!matched) selectType.value = p.type;
     } else {
       selectType.value = "";
     }
-    
-    if(document.getElementById("screen")) document.getElementById("screen").value = p.screen || "";
-    if(document.getElementById("backCamera")) document.getElementById("backCamera").value = p.backCamera || "";
-    if(document.getElementById("frontCamera")) document.getElementById("frontCamera").value = p.frontCamera || "";
 
-  }).catch(err => console.error("Lỗi lấy thông tin:", err));
+    // Mở modal
+    const modal = getModalInstance();
+    if (modal) modal.show();
+  }).catch(err => {
+    console.error("Lỗi lấy thông tin chi tiết sản phẩm:", err);
+    alert("Không thể tải thông tin sản phẩm!");
+  });
+}
+
+// 6. Lưu sản phẩm (Thêm mới hoặc Cập nhật)
+function saveProduct() {
+  // 1. Kiểm tra validation
+  if (!validateForm()) return;
+
+  const id = document.getElementById("productId").value;
+  const name = document.getElementById("name").value.trim();
+  const price = Number(document.getElementById("price").value);
+  const screen = document.getElementById("screen").value.trim();
+  const backCamera = document.getElementById("backCamera").value.trim();
+  const frontCamera = document.getElementById("frontCamera").value.trim();
+  const img = document.getElementById("img").value.trim();
+  const desc = document.getElementById("desc").value.trim();
+  const type = document.getElementById("type").value;
+
+  // 2. Tạo đối tượng từ class Product
+  const product = new Product(id ? id : 0, name, price, screen, backCamera, frontCamera, img, desc, type);
+
+  const modal = getModalInstance();
+
+  // 3. Kiểm tra Thêm mới hay Cập nhật
+  if (id) {
+    adminService.update(id, product).then(() => {
+      alert("Cập nhật sản phẩm thành công!");
+      if (modal) modal.hide();
+      fetchList();
+    }).catch(err => {
+      console.error("Lỗi cập nhật sản phẩm:", err);
+      alert("Cập nhật thất bại, vui lòng thử lại!");
+    });
+  } else {
+    adminService.add(product).then(() => {
+      alert("Thêm sản phẩm mới thành công!");
+      if (modal) modal.hide();
+      fetchList();
+    }).catch(err => {
+      console.error("Lỗi thêm sản phẩm:", err);
+      alert("Thêm mới thất bại, vui lòng thử lại!");
+    });
+  }
 }
 
 // 7. Xóa sản phẩm
 function deleteProduct(id) {
-  if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+  if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
     adminService.delete(id).then(() => {
+      alert("Đã xóa sản phẩm thành công!");
       fetchList();
-    }).catch(err => console.error("Lỗi xóa:", err));
+    }).catch(err => {
+      console.error("Lỗi xóa sản phẩm:", err);
+      alert("Xóa sản phẩm thất bại!");
+    });
   }
 }
 
@@ -165,15 +261,15 @@ function sortProduct() {
   renderTable(sortedList);
 }
 
-// 9. Tìm kiếm sản phẩm kèm popup gợi ý kiểu Google
+// 9. Tìm kiếm sản phẩm kèm popup gợi ý tìm kiếm
 function searchProduct() {
   const keyword = document.getElementById("txtSearch").value.trim().toLowerCase();
   const suggestionBox = document.getElementById("searchSuggestions");
-  
+
   const filteredList = listData.filter(item => {
     return item.name.toLowerCase().includes(keyword);
   });
-  
+
   renderTable(filteredList);
 
   if (keyword === "" || filteredList.length === 0) {
@@ -184,12 +280,13 @@ function searchProduct() {
 
   let htmlContent = "";
   filteredList.slice(0, 5).forEach(item => {
+    const imgUrl = item.img || "https://via.placeholder.com/30?text=No+Img";
     htmlContent += `
       <button type="button" class="dropdown-item d-flex align-items-center py-2 border-bottom" onclick="selectSuggestion('${item.name.replace(/'/g, "\\'")}')">
-        <img src="${item.img}" width="30" height="30" class="me-2 rounded" style="object-fit: contain;">
+        <img src="${imgUrl}" width="30" height="30" class="me-2 rounded" style="object-fit: contain;" onerror="this.src='https://via.placeholder.com/30?text=Err'">
         <div class="text-truncate">
           <div class="fw-bold text-dark small">${item.name}</div>
-          <div class="text-danger small">$${item.price}</div>
+          <div class="text-danger small">$${Number(item.price).toLocaleString()}</div>
         </div>
       </button>
     `;
@@ -205,21 +302,11 @@ function selectSuggestion(name) {
   searchProduct();
 }
 
-document.addEventListener("click", function(e) {
+// Đóng dropdown gợi ý khi click ra ngoài
+document.addEventListener("click", function (e) {
   const searchInput = document.getElementById("txtSearch");
   const suggestionBox = document.getElementById("searchSuggestions");
   if (searchInput && suggestionBox && !searchInput.contains(e.target) && !suggestionBox.contains(e.target)) {
     suggestionBox.style.display = "none";
   }
 });
-
-// Hàm hỗ trợ tắt form popup an toàn
-function closeModal() {
-  const modalElement = document.getElementById('productModal');
-  const modalInstance = bootstrap.Modal.getInstance(modalElement);
-  if(modalInstance) {
-      modalInstance.hide();
-  } else {
-      document.querySelector('.btn-close').click();
-  }
-}

@@ -75,27 +75,32 @@
             <input type="hidden" id="productId">
             <div class="row g-3">
               <div class="col-md-6">
-                <label class="form-label">Tên sản phẩm</label>
+                <label class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
                 <input type="text" id="name" class="form-control" placeholder="VD: iPhone 15 Pro">
+                <span id="errorName" class="text-danger small mt-1 d-block"></span>
               </div>
               <div class="col-md-6">
-                <label class="form-label">Giá bán ($)</label>
+                <label class="form-label">Giá bán ($) <span class="text-danger">*</span></label>
                 <input type="number" id="price" class="form-control" placeholder="VD: 999">
+                <span id="errorPrice" class="text-danger small mt-1 d-block"></span>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Màn hình</label>
                 <input type="text" id="screen" class="form-control" placeholder="VD: 6.7 inch">
+                <span id="errorScreen" class="text-danger small mt-1 d-block"></span>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Camera Sau</label>
                 <input type="text" id="backCamera" class="form-control" placeholder="VD: 48 MP">
+                <span id="errorBackCamera" class="text-danger small mt-1 d-block"></span>
               </div>
               <div class="col-md-6">
                 <label class="form-label">Camera Trước</label>
                 <input type="text" id="frontCamera" class="form-control" placeholder="VD: 12 MP">
+                <span id="errorFrontCamera" class="text-danger small mt-1 d-block"></span>
               </div>
               <div class="col-md-6">
-                <label class="form-label">Loại (Type)</label>
+                <label class="form-label">Loại (Type) <span class="text-danger">*</span></label>
                 <select id="type" class="form-select">
                   <option value="">-- Chọn loại sản phẩm --</option>
                   <option value="samsung">Samsung</option>
@@ -103,14 +108,17 @@
                   <option value="tablet">Tablet</option>
                   <option value="laptop">Laptop</option>
                 </select>
+                <span id="errorType" class="text-danger small mt-1 d-block"></span>
               </div>
               <div class="col-12">
                 <label class="form-label">Link Hình Ảnh (URL)</label>
                 <input type="text" id="img" class="form-control" placeholder="VD: https://...">
+                <span id="errorImg" class="text-danger small mt-1 d-block"></span>
               </div>
               <div class="col-12">
                 <label class="form-label">Mô tả</label>
                 <textarea id="desc" class="form-control" rows="3" placeholder="Nhập mô tả sản phẩm"></textarea>
+                <span id="errorDesc" class="text-danger small mt-1 d-block"></span>
               </div>
             </div>
           </form>
