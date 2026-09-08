@@ -1,0 +1,38 @@
+/* Custom Toast Styling */
+.toast-container {
+  margin-top: 10px;
+  margin-right: 10px;
+}
+
+#cartToast {
+  border-radius: 10px;
+  font-size: 0.95rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+#cartToast .toast-body i {
+  color: #fff;
+}
+
+/* Product Card Styling */
+.product-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12) !important;
+}
+
+.product-desc {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.45;
+}

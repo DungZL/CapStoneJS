@@ -22,15 +22,24 @@ function fetchProducts() {
 function renderProducts(list) {
   let content = "";
   list.forEach((product) => {
+    const rawDesc = product.desc || product.description || "";
+    const desc = typeof rawDesc === "string" ? rawDesc.trim() : String(rawDesc);
+    const hasDesc = desc && desc.toLowerCase() !== "undefined" && desc !== "";
+    const descHtml = hasDesc
+      ? `<p class="card-text text-muted small product-desc mb-3">${desc}</p>`
+      : "";
+
     content += `
       <div class="col-12 col-md-4 col-lg-3 mb-4">
-        <div class="card h-100">
+        <div class="card h-100 shadow-sm border-0 product-card">
           <img src="${product.img}" class="card-img-top p-3" alt="${product.name}" style="height: 250px; object-fit: contain;">
-          <div class="card-body">
+          <div class="card-body d-flex flex-column">
             <h5 class="card-title">${product.name}</h5>
-            <p class="card-text text-muted">${product.desc}</p>
             <h5 class="text-danger">$${product.price}</h5>
-            <button class="btn btn-primary mt-2" onclick="addToCart('${product.id}')">Thêm vào giỏ</button>
+            ${descHtml}
+            <button class="btn btn-primary mt-auto w-100" onclick="addToCart('${product.id}')">
+              <i class="fa fa-shopping-cart me-1"></i> Thêm vào giỏ
+            </button>
           </div>
         </div>
       </div>
@@ -65,6 +74,19 @@ function addToCart(id) {
   
   renderCart();
   saveCartToLocalStorage();
+  showToast(`Đã thêm <strong>${product.name}</strong> vào giỏ hàng thành công!`);
+}
+
+// Hiển thị thông báo Toast
+function showToast(message) {
+  const toastEl = document.getElementById("cartToast");
+  if (!toastEl) return;
+  const toastMsgEl = document.getElementById("toastMessage");
+  if (toastMsgEl && message) {
+    toastMsgEl.innerHTML = message;
+  }
+  const toast = bootstrap.Toast.getOrCreateInstance(toastEl, { delay: 2500 });
+  toast.show();
 }
 
 // 8, 10. In giỏ hàng ra màn hình và tính tổng
