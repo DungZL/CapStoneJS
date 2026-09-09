@@ -39,6 +39,9 @@ function renderTable(list) {
     content += `
       <tr>
         <td class="text-center">${index + 1}</td>
+        <td class="text-center">
+          <span class="badge bg-secondary font-monospace px-2 py-1">${item.id || "N/A"}</span>
+        </td>
         <td class="fw-bold text-dark">${item.name}</td>
         <td class="text-danger fw-bold">$${Number(item.price).toLocaleString()}</td>
         <td class="text-center">
@@ -136,10 +139,29 @@ function validateForm() {
   return isValid;
 }
 
+// Hàm tự động sinh Mã ID ngẫu nhiên từ 1 - 300 (chuẩn 3 chữ số) không trùng lặp
+function generateUniqueId() {
+  let newId = "";
+  let isDuplicate = true;
+  let attempts = 0;
+  const existingIds = new Set(listData.map(item => item && String(item.id).trim()));
+
+  while (isDuplicate && attempts < 1000) {
+    const randNum = Math.floor(Math.random() * 300) + 1;
+    newId = String(randNum).padStart(3, "0");
+    isDuplicate = existingIds.has(newId) || existingIds.has(String(randNum));
+    attempts++;
+  }
+  return newId;
+}
+
 // 4. Reset form khi bấm "Thêm Sản Phẩm"
 function resetForm() {
   document.getElementById("productForm").reset();
-  document.getElementById("productId").value = "";
+  const autoId = generateUniqueId();
+  document.getElementById("productId").value = autoId;
+  const isEditEl = document.getElementById("isEditMode");
+  if (isEditEl) isEditEl.value = "false";
   document.getElementById("modalTitle").innerText = "Thêm Sản Phẩm Mới";
 
   // Xóa toàn bộ trạng thái lỗi
@@ -153,6 +175,8 @@ function resetForm() {
 // 5. Đưa dữ liệu lên form để Sửa sản phẩm
 function editProduct(id) {
   resetForm();
+  const isEditEl = document.getElementById("isEditMode");
+  if (isEditEl) isEditEl.value = "true";
   document.getElementById("modalTitle").innerText = "Cập nhật sản phẩm";
 
   adminService.getDetail(id).then(res => {
@@ -197,7 +221,15 @@ function saveProduct() {
   // 1. Kiểm tra validation
   if (!validateForm()) return;
 
-  const id = document.getElementById("productId").value;
+  const isEditEl = document.getElementById("isEditMode");
+  const isEdit = isEditEl && isEditEl.value === "true";
+  let id = document.getElementById("productId").value.trim();
+
+  if (!isEdit && !id) {
+    id = generateUniqueId();
+    document.getElementById("productId").value = id;
+  }
+
   const name = document.getElementById("name").value.trim();
   const price = Number(document.getElementById("price").value);
   const screen = document.getElementById("screen").value.trim();
@@ -208,12 +240,12 @@ function saveProduct() {
   const type = document.getElementById("type").value;
 
   // 2. Tạo đối tượng từ class Product
-  const product = new Product(id ? id : 0, name, price, screen, backCamera, frontCamera, img, desc, type);
+  const product = new Product(id, name, price, screen, backCamera, frontCamera, img, desc, type);
 
   const modal = getModalInstance();
 
   // 3. Kiểm tra Thêm mới hay Cập nhật
-  if (id) {
+  if (isEdit) {
     adminService.update(id, product).then(() => {
       alert("Cập nhật sản phẩm thành công!");
       if (modal) modal.hide();

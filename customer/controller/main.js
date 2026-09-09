@@ -13,13 +13,24 @@ function fetchProducts() {
   customerService.getProductsApi()
     .then((res) => {
       productList = res.data;
-      renderProducts(productList);
+      filterAndSortProducts();
     })
     .catch((err) => console.log(err));
 }
 
 // 2 & 3. Hàm tạo giao diện hiển thị danh sách sản phẩm
 function renderProducts(list) {
+  if (!list || list.length === 0) {
+    document.getElementById("productList").innerHTML = `
+      <div class="col-12 text-center py-5 text-muted">
+        <i class="fa fa-box-open fs-1 mb-3 d-block"></i>
+        <h5>Không tìm thấy sản phẩm phù hợp</h5>
+        <p class="small">Vui lòng thử chọn lại danh mục hoặc bộ lọc khác.</p>
+      </div>
+    `;
+    return;
+  }
+
   let content = "";
   list.forEach((product) => {
     const rawDesc = product.desc || product.description || "";
@@ -32,10 +43,10 @@ function renderProducts(list) {
     content += `
       <div class="col-12 col-md-4 col-lg-3 mb-4">
         <div class="card h-100 shadow-sm border-0 product-card">
-          <img src="${product.img}" class="card-img-top p-3" alt="${product.name}" style="height: 250px; object-fit: contain;">
+          <img src="${product.img}" class="card-img-top p-3" alt="${product.name}" style="height: 250px; object-fit: contain;" onerror="this.src='https://via.placeholder.com/250?text=No+Image'">
           <div class="card-body d-flex flex-column">
             <h5 class="card-title">${product.name}</h5>
-            <h5 class="text-danger">$${product.price}</h5>
+            <h5 class="text-danger fw-bold">$${Number(product.price).toLocaleString()}</h5>
             ${descHtml}
             <button class="btn btn-primary mt-auto w-100" onclick="addToCart('${product.id}')">
               <i class="fa fa-shopping-cart me-1"></i> Thêm vào giỏ
@@ -48,15 +59,36 @@ function renderProducts(list) {
   document.getElementById("productList").innerHTML = content;
 }
 
-// 4. Lọc sản phẩm
-function filterProduct() {
-  const type = document.getElementById("selectFilter").value.toLowerCase();
-  if (type === "all") {
-    renderProducts(productList);
-  } else {
-    const filteredList = productList.filter((p) => (p.type || "").toLowerCase() === type);
-    renderProducts(filteredList);
+// 4. Lọc & Sắp xếp sản phẩm
+function filterAndSortProducts() {
+  const filterEl = document.getElementById("selectFilter");
+  const sortEl = document.getElementById("selSort");
+
+  const type = filterEl ? filterEl.value.toLowerCase() : "all";
+  const sortValue = sortEl ? sortEl.value : "";
+
+  // 1. Lọc theo loại sản phẩm
+  let result = [...productList];
+  if (type && type !== "all") {
+    result = result.filter((p) => (p.type || "").toLowerCase() === type);
   }
+
+  // 2. Sắp xếp theo giá tiền
+  if (sortValue === "asc") {
+    result.sort((a, b) => Number(a.price) - Number(b.price));
+  } else if (sortValue === "desc") {
+    result.sort((a, b) => Number(b.price) - Number(a.price));
+  }
+
+  renderProducts(result);
+}
+
+function filterProduct() {
+  filterAndSortProducts();
+}
+
+function sortProduct() {
+  filterAndSortProducts();
 }
 
 // 5, 6, 7. Thêm vào giỏ hàng

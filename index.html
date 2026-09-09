@@ -25,17 +25,31 @@
     </div>
   </nav>
 
-  <!-- Filter -->
+  <!-- Filter & Sort -->
   <div class="container mt-4">
-    <div class="w-25">
-      <label class="form-label fw-bold">Lọc sản phẩm:</label>
-      <select id="selectFilter" class="form-select" onchange="filterProduct()">
-        <option value="all">Tất cả</option>
-        <option value="samsung">Samsung</option>
-        <option value="iphone">iPhone</option>
-        <option value="tablet">Tablet</option>
-        <option value="laptop">Laptop</option>
-      </select>
+    <div class="row g-3 align-items-end">
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <label for="selectFilter" class="form-label fw-bold">
+          <i class="fa fa-filter me-1"></i> Lọc sản phẩm:
+        </label>
+        <select id="selectFilter" class="form-select" onchange="filterAndSortProducts()">
+          <option value="all">Tất cả sản phẩm</option>
+          <option value="samsung">Samsung</option>
+          <option value="iphone">iPhone</option>
+          <option value="tablet">Tablet</option>
+          <option value="laptop">Laptop</option>
+        </select>
+      </div>
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <label for="selSort" class="form-label fw-bold">
+          <i class="fa fa-arrow-down-short-wide me-1"></i> Sắp xếp theo giá:
+        </label>
+        <select id="selSort" class="form-select" onchange="filterAndSortProducts()">
+          <option value="">Sắp xếp theo giá</option>
+          <option value="asc">Tăng dần (Thấp đến Cao)</option>
+          <option value="desc">Giảm dần (Cao đến Thấp)</option>
+        </select>
+      </div>
     </div>
   </div>
 

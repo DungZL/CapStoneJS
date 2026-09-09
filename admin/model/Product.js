@@ -9,6 +9,7 @@ class Product {
     this.frontCamera = frontCamera;
     this.img = img;
     this.desc = desc;
+    this.description = desc;
     this.type = type;
   }
 }
