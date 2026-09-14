@@ -15,7 +15,7 @@
   <!-- Header -->
   <nav class="navbar navbar-dark bg-dark">
     <div class="container">
-      <a class="navbar-brand" href="#">Cyber</a>
+      <a class="navbar-brand" href="#">CyberPhone</a>
       <div>
         <a href="./admin/view/admin.html" class="btn btn-outline-light me-3">Chuyển sang Admin</a>
         <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#cartModal">
@@ -25,15 +25,31 @@
     </div>
   </nav>
 
-  <!-- Filter -->
+  <!-- Filter & Sort -->
   <div class="container mt-4">
-    <div class="w-25">
-      <label class="form-label fw-bold">Lọc sản phẩm:</label>
-      <select id="selectFilter" class="form-select" onchange="filterProduct()">
-        <option value="all">Tất cả</option>
-        <option value="samsung">Samsung</option>
-        <option value="iphone">iPhone</option>
-      </select>
+    <div class="row g-3 align-items-end">
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <label for="selectFilter" class="form-label fw-bold">
+          <i class="fa fa-filter me-1"></i> Lọc sản phẩm:
+        </label>
+        <select id="selectFilter" class="form-select" onchange="filterAndSortProducts()">
+          <option value="all">Tất cả sản phẩm</option>
+          <option value="samsung">Samsung</option>
+          <option value="iphone">iPhone</option>
+          <option value="tablet">Tablet</option>
+          <option value="laptop">Laptop</option>
+        </select>
+      </div>
+      <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+        <label for="selSort" class="form-label fw-bold">
+          <i class="fa fa-arrow-down-short-wide me-1"></i> Sắp xếp theo giá:
+        </label>
+        <select id="selSort" class="form-select" onchange="filterAndSortProducts()">
+          <option value="">Sắp xếp theo giá</option>
+          <option value="asc">Tăng dần (Thấp đến Cao)</option>
+          <option value="desc">Giảm dần (Cao đến Thấp)</option>
+        </select>
+      </div>
     </div>
   </div>
 
@@ -72,6 +88,19 @@
           <button class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
           <button class="btn btn-success" onclick="checkout()">Thanh toán</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Thông Báo Thêm Giỏ Hàng -->
+  <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1090;">
+    <div id="cartToast" class="toast align-items-center text-bg-success border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="d-flex">
+        <div class="toast-body d-flex align-items-center">
+          <i class="fa fa-circle-check fs-5 me-2"></i>
+          <span id="toastMessage">Đã thêm vào giỏ hàng thành công!</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
     </div>
   </div>
